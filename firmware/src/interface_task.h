@@ -30,11 +30,7 @@ protected:
     void run();
 
 private:
-#if defined(CONFIG_IDF_TARGET_ESP32S3) && !SK_FORCE_UART_STREAM
-    HWCDC stream_;
-#else
     UartStream stream_;
-#endif
     MotorTask &motor_task_;
     char buf_[128];
 
@@ -61,7 +57,6 @@ private:
     SerialProtocolProtobuf proto_protocol_;
 
     void changeConfig(bool next);
-    void updateHardware();
     void publishState();
     void applyConfig(PB_SmartKnobConfig &config, bool from_remote);
 };

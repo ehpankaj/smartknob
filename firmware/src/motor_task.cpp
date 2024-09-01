@@ -28,15 +28,7 @@ void MotorTask::run()
     driver.voltage_power_supply = 5;
     driver.init();
 
-#if SENSOR_TLV
-    encoder.init(&Wire, false);
-#elif SENSOR_MT6701
     encoder.init();
-#elif SENSOR_MAQ430
-    SPIClass *spi = new SPIClass(HSPI);
-    spi->begin(PIN_MAQ_SCK, PIN_MAQ_MISO, PIN_MAQ_MOSI, PIN_MAQ_SS);
-    encoder.init(spi);
-#endif
 
     motor.linkDriver(&driver);
 
@@ -579,19 +571,12 @@ void MotorTask::calibrate()
 
 void MotorTask::checkSensorError()
 {
-#if SENSOR_TLV
-    if (encoder.getAndClearError())
-    {
-        log("LOCKED!");
-    }
-#elif SENSOR_MT6701
     float error = encoder.getAngle();
     if (error)
     {
         snprintf(buf_, sizeof(buf_), "angle. Received %d;", error);
         log(buf_);
     }
-#endif
 }
 
 void MotorTask::setLogger(Logger *logger)

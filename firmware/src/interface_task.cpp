@@ -151,9 +151,25 @@ static PB_SmartKnobConfig configs[] = {
         0,
         6,
         0,
+        100,
+        8.225806452 * PI / 720,
+        3,
+        1,
+        1.1,
+        "Coarse values 2\nStrong detents",
+        0,
+        {},
+        0,
+        200,
+    },
+    {
+        0,
+        0,
+        6,
+        0,
         31,
         8.225806452 * PI / 180,
-        0.2,
+        1.4,
         1,
         1.1,
         "Coarse values\nWeak detents",
@@ -223,7 +239,7 @@ void InterfaceTask::run()
 {
     stream_.begin();
 
-    // Wire.begin(PIN_SDA, PIN_SCL);
+    Wire.begin();
     // Wire.setClock(400000);
 
     applyConfig(configs[0], false);
@@ -296,8 +312,6 @@ void InterfaceTask::run()
             current_protocol_->log(log_string->c_str());
             delete log_string;
         }
-
-        updateHardware();
 
         if (!configuration_loaded_)
         {
