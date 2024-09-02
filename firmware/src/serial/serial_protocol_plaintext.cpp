@@ -126,8 +126,10 @@ void SerialProtocolPlaintext::displayValue(int index)
 
 void SerialProtocolPlaintext::displayUI()
 {
-    stream_.println("\033[2J"); // Clear the entire screen
-    stream_.println("\033[H");  // Move cursor to the top left
+    for (int i = 0; i < 25; i++)
+    {
+        stream_.println(); // Print multiple new lines to simulate clearing the screen
+    }
 
     stream_.println("=== Input Menu ===");
     for (int i = 0; i < 5; i++)
