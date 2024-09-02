@@ -1,7 +1,23 @@
 #include "../proto_gen/smartknob.pb.h"
 #include "serial_protocol_plaintext.h"
 
-String values[5] = {"5", "Text1", "3", "Text2", "10"}; // Initial values
+String configValues[14] = {
+    "0",
+    "0",
+    "1",
+    "0",
+    "10",
+    "10 * PI / 180",
+    "0",
+    "1",
+    "1.1",
+    "Bounded 0-10\nNo detents",
+    "0",
+    {},
+    "0",
+    "0",
+}; // Initial configValues
+String configKeys[14] = {"position", "sub_position_unit", "position_nonce", "min_position", "max_position", "position_width_radians", "detent_strength_unit", "endstop_strength_unit", "snap_point", "text", "detent_positions_count", "detent_positions", "snap_point_bias", "led_hue"};
 
 void SerialProtocolPlaintext::handleState(const PB_SmartKnobState &state)
 {
@@ -62,9 +78,9 @@ bool SerialProtocolPlaintext::isNumeric(String str)
 void SerialProtocolPlaintext::handleEditInput(char input)
 {
     if (input == '\n' || input == '\r')
-    {                                        // Handle both Enter (newline) and carriage return
-        values[selectedIndex] = inputBuffer; // Update the selected value
-        editing = false;                     // Exit editing mode
+    {                                              // Handle both Enter (newline) and carriage return
+        configValues[selectedIndex] = inputBuffer; // Update the selected value
+        editing = false;                           // Exit editing mode
     }
     else if (input == '\b' || input == 127)
     { // Handle backspace
@@ -85,24 +101,24 @@ void SerialProtocolPlaintext::handleNavigationInput(char input)
     {
     case 'n': // Enter edit mode to type a new value
         editing = true;
-        inputBuffer = values[selectedIndex]; // Initialize buffer with the current value
+        inputBuffer = configValues[selectedIndex]; // Initialize buffer with the current value
         break;
-    case 'a':                                        // Left arrow key (in some terminals)
-        selectedIndex = (selectedIndex - 1 + 5) % 5; // Move left
+    case 'a':                                          // Left arrow key (in some terminals)
+        selectedIndex = (selectedIndex - 1 + 14) % 14; // Move left
         break;
-    case 'd':                                    // Right arrow key (in some terminals)
-        selectedIndex = (selectedIndex + 1) % 5; // Move right
+    case 'd':                                     // Right arrow key (in some terminals)
+        selectedIndex = (selectedIndex + 1) % 14; // Move right
         break;
-    case 'w': // Up arrow key for increasing numeric values
-        if (isNumeric(values[selectedIndex]))
+    case 'w': // Up arrow key for increasing numeric configValues
+        if (isNumeric(configValues[selectedIndex]))
         {
-            values[selectedIndex] = String(values[selectedIndex].toInt() + 1); // Increment number
+            configValues[selectedIndex] = String(configValues[selectedIndex].toInt() + 1); // Increment number
         }
         break;
-    case 's': // Down arrow key for decreasing numeric values
-        if (isNumeric(values[selectedIndex]))
+    case 's': // Down arrow key for decreasing numeric configValues
+        if (isNumeric(configValues[selectedIndex]))
         {
-            values[selectedIndex] = String(values[selectedIndex].toInt() - 1); // Decrement number
+            configValues[selectedIndex] = String(configValues[selectedIndex].toInt() - 1); // Decrement number
         }
         break;
     default:
@@ -121,7 +137,7 @@ void SerialProtocolPlaintext::displayValue(int index)
     {
         stream_.print("   ");
     }
-    stream_.println("Value " + String(index + 1) + ": " + values[index]);
+    stream_.println(String(configKeys[index]) + ": " + configValues[index]);
 }
 
 void SerialProtocolPlaintext::displayUI()
@@ -132,7 +148,7 @@ void SerialProtocolPlaintext::displayUI()
     }
 
     stream_.println("=== Input Menu ===");
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 14; i++)
     {
         displayValue(i); // Display each value with initial settings
     }

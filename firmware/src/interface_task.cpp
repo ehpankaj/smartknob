@@ -44,7 +44,7 @@ static PB_SmartKnobConfig configs[] = {
         0,
         1,
         1.1,
-        "Bounded 0-10\nNo detents",
+        "Bounded 0-10",
         0,
         {},
         0,
