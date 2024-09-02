@@ -216,7 +216,7 @@ InterfaceTask::InterfaceTask(const uint8_t task_core, MotorTask &motor_task) : T
                                                                                stream_(),
                                                                                motor_task_(motor_task),
                                                                                plaintext_protocol_(stream_, [this]()
-                                                                                                   { motor_task_.runCalibration(); }),
+                                                                                                   { motor_task_.runCalibration(); }, motor_task_),
                                                                                proto_protocol_(stream_, [this](PB_SmartKnobConfig &config)
                                                                                                { applyConfig(config, true); })
 {
