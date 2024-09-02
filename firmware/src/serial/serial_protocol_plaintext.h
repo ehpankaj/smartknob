@@ -26,7 +26,7 @@ public:
     void handleNavigationInput(char input);
 
     void init(DemoConfigChangeCallback demo_config_change_callback, StrainCalibrationCallback strain_calibration_callback);
-    void applyNewConfig(const String &configString);
+    void applyNewConfig();
 
 private:
     String currentConfig;

@@ -1,7 +1,7 @@
 #include "../proto_gen/smartknob.pb.h"
 #include "serial_protocol_plaintext.h"
 
-String configValues[14] = {
+String configValues[13] = {
     "0",
     "0",
     "1",
@@ -13,11 +13,10 @@ String configValues[14] = {
     "1.1",
     "Bounded 0-10\nNo detents",
     "0",
-    {},
     "0",
     "0",
 }; // Initial configValues
-String configKeys[14] = {"position", "sub_position_unit", "position_nonce", "min_position", "max_position", "position_width_radians", "detent_strength_unit", "endstop_strength_unit", "snap_point", "text", "detent_positions_count", "detent_positions", "snap_point_bias", "led_hue"};
+String configKeys[13] = {"position", "sub_position_unit", "position_nonce", "min_position", "max_position", "position_width_radians", "detent_strength_unit", "endstop_strength_unit", "snap_point", "text", "detent_positions_count", "snap_point_bias", "led_hue"};
 
 void SerialProtocolPlaintext::handleState(const PB_SmartKnobState &state)
 {
@@ -42,34 +41,41 @@ void SerialProtocolPlaintext::log(const char *msg)
     stream_.println(msg);
 }
 
-// void SerialProtocolPlaintext::applyNewConfig(const String &configString)
-// {
-//     PB_SmartKnobConfig newConfig;
-//     sscanf(configString.c_str(), "%d,%f,%hhu,%d,%d,%f,%f,%f,%f,%50[^,],%hhu,%d,%f,%hhd",
-//            &newConfig.position,
-//            &newConfig.sub_position_unit,
-//            &newConfig.position_nonce,
-//            &newConfig.min_position,
-//            &newConfig.max_position,
-//            &newConfig.position_width_radians,
-//            &newConfig.detent_strength_unit,
-//            &newConfig.endstop_strength_unit,
-//            &newConfig.snap_point,
-//            newConfig.text,
-//            &newConfig.detent_positions_count,
-//            newConfig.detent_positions,
-//            &newConfig.snap_point_bias,
-//            &newConfig.led_hue);
+void SerialProtocolPlaintext::applyNewConfig()
+{
+    PB_SmartKnobConfig newConfig;
 
-//     motor_task_.setConfig(newConfig); // Use motor_task_ reference
-//     stream_.println("New configuration applied.");
-// }
+    newConfig.position = configValues[0].toInt();                                 // Convert String to int32_t
+    newConfig.sub_position_unit = configValues[1].toFloat();                      // Convert String to float
+    newConfig.position_nonce = static_cast<uint8_t>(configValues[2].toInt());     // Convert String to uint8_t
+    newConfig.min_position = configValues[3].toInt();                             // Convert String to int32_t
+    newConfig.max_position = configValues[4].toInt();                             // Convert String to int32_t
+    newConfig.position_width_radians = configValues[5].toFloat();                 // Convert String to float
+    newConfig.detent_strength_unit = configValues[6].toFloat();                   // Convert String to float
+    newConfig.endstop_strength_unit = configValues[7].toFloat();                  // Convert String to float
+    newConfig.snap_point = configValues[8].toFloat();                             // Convert String to float
+    strncpy(newConfig.text, configValues[9].c_str(), sizeof(newConfig.text) - 1); // Copy String to char array
+    newConfig.detent_positions_count = configValues[10].toInt();                  // Convert String to pb_size_t
+    newConfig.snap_point_bias = configValues[11].toFloat();                       // Convert String to float
+    newConfig.led_hue = configValues[12].toInt();                                 // Convert String to int16_t
+    // newConfig.detent_positions = {};
+
+    motor_task_.setConfig(newConfig); // Use motor_task_ reference
+    stream_.println("New configuration applied.");
+}
 
 bool SerialProtocolPlaintext::isNumeric(String str)
 {
+    bool decimalPointFound = false; // Track if a decimal point has been found
     for (int i = 0; i < str.length(); i++)
     {
-        if (!isDigit(str[i]))
+        if (str[i] == '.')
+        {
+            if (decimalPointFound)
+                return false;         // More than one decimal point
+            decimalPointFound = true; // Mark decimal point as found
+        }
+        else if (!isDigit(str[i]))
             return false; // Check if each character is a digit
     }
     return true;
@@ -104,10 +110,10 @@ void SerialProtocolPlaintext::handleNavigationInput(char input)
         inputBuffer = configValues[selectedIndex]; // Initialize buffer with the current value
         break;
     case 'a':                                          // Left arrow key (in some terminals)
-        selectedIndex = (selectedIndex - 1 + 14) % 14; // Move left
+        selectedIndex = (selectedIndex - 1 + 13) % 13; // Move left
         break;
     case 'd':                                     // Right arrow key (in some terminals)
-        selectedIndex = (selectedIndex + 1) % 14; // Move right
+        selectedIndex = (selectedIndex + 1) % 13; // Move right
         break;
     case 'w': // Up arrow key for increasing numeric configValues
         if (isNumeric(configValues[selectedIndex]))
@@ -148,15 +154,18 @@ void SerialProtocolPlaintext::displayUI()
     }
 
     stream_.println("=== Input Menu ===");
-    for (int i = 0; i < 14; i++)
+    for (int i = 0; i < 13; i++)
     {
         displayValue(i); // Display each value with initial settings
     }
 
-    stream_.println("\nUse Left/Right arrow keys to select, Up/Down to change (for numbers), or 'n' to type a value.");
     if (editing)
     {
         stream_.print("Editing: " + inputBuffer + " (Press Enter to confirm)");
+    }
+    else
+    {
+        applyNewConfig();
     }
 }
 
@@ -170,12 +179,13 @@ void SerialProtocolPlaintext::loop()
         if (editing)
         {
             handleEditInput(b); // If in editing mode, handle user input for editing
+            displayUI();
         }
         if (addConfigMode && !editing)
         {
             handleNavigationInput(b); // Handle navigation input (arrow keys, etc.)
+            displayUI();
         }
-        displayUI();
         if (b == 'N') // Start editing the configuration
         {
             addConfigMode = true;
