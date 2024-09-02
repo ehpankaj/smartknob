@@ -19,6 +19,11 @@ public:
     void log(const char *msg) override;
     void loop() override;
     void handleState(const PB_SmartKnobState &state) override;
+    void displayValue(int index);
+    void displayUI();
+    bool isNumeric(String str);
+    void handleEditInput(char input);
+    void handleNavigationInput(char input);
 
     void init(DemoConfigChangeCallback demo_config_change_callback, StrainCalibrationCallback strain_calibration_callback);
     void applyNewConfig(const String &configString);
@@ -26,6 +31,10 @@ public:
 private:
     String currentConfig;
     Stream &stream_;
+    int selectedIndex = 0; // Index of the currently selected value
+    bool editing = false;  // Indicates if user is currently typing a new value
+    bool addConfigMode = false;
+    String inputBuffer = "";
     MotorCalibrationCallback motor_calibration_callback_;
     MotorTask &motor_task_;
     PB_SmartKnobState latest_state_ = {};
