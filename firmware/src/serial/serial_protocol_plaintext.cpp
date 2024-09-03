@@ -11,12 +11,62 @@ String configValues[13] = {
     "0",
     "1",
     "1.1",
-    "Bounded 0-10\nNo detents",
+    "Test Config",
     "0",
     "0",
     "0",
 }; // Initial configValues
 String configKeys[13] = {"position", "sub_position_unit", "position_nonce", "min_position", "max_position", "position_width_radians", "detent_strength_unit", "endstop_strength_unit", "snap_point", "text", "detent_positions_count", "snap_point_bias", "led_hue"};
+
+// Function to evaluate mathematical expressions
+float SerialProtocolPlaintext::evalExpression(const String &expr)
+{
+    // Example: "8.225806452 * PI / 720"
+    float multiplier = 0.0;
+    int divisor = 1;
+
+    // Split the expression
+    int piIndex = expr.indexOf("PI");
+    stream_.println(piIndex);
+    if (piIndex != -1)
+    {
+        // Extract the multiplier
+        String multiplierStr = expr.substring(0, piIndex); // Get substring before "PI"
+        stream_.println(multiplierStr);
+        multiplierStr.trim(); // Trim whitespace
+
+        // Check for any remaining operators or invalid characters
+        if (multiplierStr.endsWith(" *") || multiplierStr.endsWith(" /"))
+        {
+            multiplierStr.remove(multiplierStr.length() - 2); // Remove the operator and space
+        }
+        stream_.println(multiplierStr);
+        multiplier = multiplierStr.toFloat(); // Convert to float
+
+        // Extract the divisor
+        String divisorStr = expr.substring(piIndex + 2); // Get substring after "PI"
+        stream_.println(divisorStr);
+        divisorStr.trim(); // Trim whitespace
+
+        // Check for any remaining operators or invalid characters
+        if (divisorStr.startsWith("* ") || divisorStr.startsWith("/ "))
+        {
+            divisorStr.remove(0, 2); // Remove the operator and space
+        }
+        stream_.println(divisorStr);
+        divisor = divisorStr.toInt(); // Convert to int
+
+        // Check for division by zero
+        if (divisor == 0)
+        {
+            stream_.println("Error: Division by zero");
+            return 0; // Return a default value or handle the error as needed
+        }
+    }
+    stream_.println((multiplier * PI) / divisor);
+    // Calculate the result
+    return (multiplier * PI) / divisor;
+}
 
 void SerialProtocolPlaintext::handleState(const PB_SmartKnobState &state)
 {
@@ -50,7 +100,7 @@ void SerialProtocolPlaintext::applyNewConfig()
     newConfig.position_nonce = static_cast<uint8_t>(configValues[2].toInt());     // Convert String to uint8_t
     newConfig.min_position = configValues[3].toInt();                             // Convert String to int32_t
     newConfig.max_position = configValues[4].toInt();                             // Convert String to int32_t
-    newConfig.position_width_radians = configValues[5].toFloat();                 // Convert String to float
+    newConfig.position_width_radians = evalExpression(configValues[5]);           // Convert String to float
     newConfig.detent_strength_unit = configValues[6].toFloat();                   // Convert String to float
     newConfig.endstop_strength_unit = configValues[7].toFloat();                  // Convert String to float
     newConfig.snap_point = configValues[8].toFloat();                             // Convert String to float

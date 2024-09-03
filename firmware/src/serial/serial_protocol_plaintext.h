@@ -24,6 +24,7 @@ public:
     bool isNumeric(String str);
     void handleEditInput(char input);
     void handleNavigationInput(char input);
+    float evalExpression(const String &expr);
 
     void init(DemoConfigChangeCallback demo_config_change_callback, StrainCalibrationCallback strain_calibration_callback);
     void applyNewConfig();
