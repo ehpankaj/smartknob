@@ -159,22 +159,22 @@ void SerialProtocolPlaintext::handleNavigationInput(char input)
         editing = true;
         inputBuffer = configValues[selectedIndex]; // Initialize buffer with the current value
         break;
-    case 'a':                                          // Left arrow key (in some terminals)
+    case 'w':                                          // Left arrow key (in some terminals)
         selectedIndex = (selectedIndex - 1 + 13) % 13; // Move left
         break;
-    case 'd':                                     // Right arrow key (in some terminals)
+    case 's':                                     // Right arrow key (in some terminals)
         selectedIndex = (selectedIndex + 1) % 13; // Move right
         break;
-    case 'w': // Up arrow key for increasing numeric configValues
+    case 'a': // Up arrow key for increasing numeric configValues
         if (isNumeric(configValues[selectedIndex]))
         {
-            configValues[selectedIndex] = String(configValues[selectedIndex].toInt() + 1); // Increment number
+            configValues[selectedIndex] = String(configValues[selectedIndex].toInt() + 0.1); // Increment number
         }
         break;
-    case 's': // Down arrow key for decreasing numeric configValues
+    case 'd': // Down arrow key for decreasing numeric configValues
         if (isNumeric(configValues[selectedIndex]))
         {
-            configValues[selectedIndex] = String(configValues[selectedIndex].toInt() - 1); // Decrement number
+            configValues[selectedIndex] = String(configValues[selectedIndex].toInt() - 0.1); // Decrement number
         }
         break;
     default:
