@@ -25,7 +25,7 @@ MagneticSensorI2C encoder = MagneticSensorI2C(AS5600_I2C);
 void MotorTask::run()
 {
 
-    driver.voltage_power_supply = 5;
+    driver.voltage_power_supply = 9;
     driver.init();
 
     encoder.init();
