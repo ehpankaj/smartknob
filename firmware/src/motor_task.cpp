@@ -24,8 +24,8 @@ MagneticSensorI2C encoder = MagneticSensorI2C(AS5600_I2C);
 
 void MotorTask::run()
 {
-
-    driver.voltage_power_supply = 9;
+    driver.voltage_power_supply = 6;
+    driver.pwm_frequency = 50000;
     driver.init();
 
     encoder.init();
@@ -34,7 +34,7 @@ void MotorTask::run()
 
     motor.controller = MotionControlType::torque;
     motor.voltage_limit = FOC_VOLTAGE_LIMIT;
-    motor.velocity_limit = 10000;
+    motor.velocity_limit = 100;
     motor.linkSensor(&encoder);
 
     // Not actually using the velocity loop built into SimpleFOC; but I'm using those PID variables
@@ -52,7 +52,7 @@ void MotorTask::run()
     motor.init();
 
     encoder.update();
-    delay(10);
+    // delay(10);
 
     PB_PersistentConfiguration c = configuration_.get();
     motor.pole_pairs = c.motor.calibrated ? c.motor.pole_pairs : 7;

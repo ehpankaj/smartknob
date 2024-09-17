@@ -42,7 +42,7 @@ static PB_SmartKnobConfig configs[] = {
         10,
         10 * PI / 180,
         0,
-        1,
+        0.3,
         1.1,
         "Bounded 0-10",
         0,

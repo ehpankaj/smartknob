@@ -60,7 +60,7 @@ private:
 
     // BLDC motor & driver instance
     BLDCMotor motor = BLDCMotor(1);
-    BLDCDriver3PWM driver = BLDCDriver3PWM(PIN_UH, PIN_VH, PIN_WH);
+    BLDCDriver6PWM driver = BLDCDriver6PWM(PIN_UH, PIN_UL, PIN_VH, PIN_VL, PIN_WH, PIN_WL);
 
     void publish(const PB_SmartKnobState &state);
     void calibrate();
