@@ -33,8 +33,6 @@ void MotorTask::run()
     motor.linkDriver(&driver);
 
     motor.controller = MotionControlType::torque;
-    motor.voltage_limit = FOC_VOLTAGE_LIMIT;
-    motor.velocity_limit = 100;
     motor.linkSensor(&encoder);
 
     // Not actually using the velocity loop built into SimpleFOC; but I'm using those PID variables
@@ -48,6 +46,48 @@ void MotorTask::run()
 #ifdef FOC_LPF
     motor.LPF_angle.Tf = FOC_LPF;
 #endif
+
+    // control loop type and torque mode
+    motor.motion_downsample = 0.0;
+
+    // velocity loop PID
+    motor.PID_velocity.P = FOC_PID_P;
+    motor.PID_velocity.I = FOC_PID_I;
+    motor.PID_velocity.D = FOC_PID_D;
+    motor.PID_velocity.output_ramp = FOC_PID_OUTPUT_RAMP;
+    motor.PID_velocity.limit = FOC_PID_LIMIT;
+    // Low pass filtering time constant
+    motor.LPF_velocity.Tf = FOC_LPF;
+    // angle loop PID
+    motor.P_angle.P = 25.0;
+    motor.P_angle.I = 2.0;
+    motor.P_angle.D = 0.0;
+    motor.P_angle.output_ramp = 5000.0;
+    // Low pass filtering time constant
+    motor.LPF_angle.Tf = 0.009;
+    // current q loop PID
+    motor.PID_current_q.P = 30.0;
+    motor.PID_current_q.I = 100.0;
+    motor.PID_current_q.D = 0.0;
+    motor.PID_current_q.output_ramp = 0.0;
+    motor.PID_current_q.limit = FOC_PID_LIMIT;
+    // Low pass filtering time constant
+    motor.LPF_current_q.Tf = 0.005;
+    // current d loop PID
+    motor.PID_current_d.P = 3.0;
+    motor.PID_current_d.I = 300.0;
+    motor.PID_current_d.D = 0.0;
+    motor.PID_current_d.output_ramp = 0.0;
+    motor.PID_current_d.limit = FOC_PID_LIMIT;
+    // Low pass filtering time constant
+    motor.LPF_current_d.Tf = 0.005;
+    // Limits
+    motor.velocity_limit = 100.0;
+    motor.voltage_limit = FOC_PID_LIMIT;
+    motor.current_limit = 1;
+    // sensor zero offset - home position
+    motor.foc_modulation = FOCModulationType::SinePWM;
+    motor.modulation_centered = 1.0;
 
     motor.init();
 
