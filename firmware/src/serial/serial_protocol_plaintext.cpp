@@ -1,5 +1,6 @@
 #include "../proto_gen/smartknob.pb.h"
 #include "serial_protocol_plaintext.h"
+#include "bluetooth.h"
 
 String configValues[13] = {
     "0",
@@ -75,13 +76,19 @@ void SerialProtocolPlaintext::handleState(const PB_SmartKnobState &state)
 
     if (substantial_change)
     {
-        stream_.printf("STATE: %d [%d, %d]  (detent strength: %0.2f, width: %0.0f deg, endstop strength: %0.2f)\n",
-                       state.current_position,
-                       state.config.min_position,
-                       state.config.max_position,
-                       state.config.detent_strength_unit,
-                       degrees(state.config.position_width_radians),
-                       state.config.endstop_strength_unit);
+        char buffer[200];
+        snprintf(buffer, sizeof(buffer), "STATE: %d [%d, %d]  (detent strength: %0.2f, width: %0.0f deg, endstop strength: %0.2f)\n",
+                 state.current_position,
+                 state.config.min_position,
+                 state.config.max_position,
+                 state.config.detent_strength_unit,
+                 degrees(state.config.position_width_radians),
+                 state.config.endstop_strength_unit);
+
+        stream_.print(buffer);
+        char ble_buffer[200];
+        snprintf(ble_buffer, sizeof(ble_buffer), "%s\n", buffer);
+        bluetooth_task->sendData(ble_buffer); // Send the state over Bluetooth
     }
 }
 
