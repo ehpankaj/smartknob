@@ -6,11 +6,15 @@
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID_TX "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_RX "beb5483e-36e1-4688-b7f5-ea07361b26a9"     // New UUID for RX characteristic
+#define CHARACTERISTIC_UUID_SENSOR "beb5483e-36e1-4688-b7f5-ea07361b26aa" // New UUID for sensor data characteristic
 
 #define MAX_BLE_DATA_SIZE 200
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
+BLECharacteristic *pRxCharacteristic;     // New RX characteristic
+BLECharacteristic *pSensorCharacteristic; // New sensor data characteristic
 bool deviceConnected = false;
 
 class MyServerCallbacks : public BLEServerCallbacks
@@ -28,16 +32,49 @@ class MyServerCallbacks : public BLEServerCallbacks
     }
 };
 
+class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
+{
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
+        std::string rxValue = pCharacteristic->getValue();
+        if (rxValue.length() > 0)
+        {
+            Serial.println("Received Value: ");
+            for (int i = 0; i < rxValue.length(); i++)
+            {
+                Serial.print(rxValue[i]);
+            }
+            Serial.println();
+            // Process the received data here
+        }
+    }
+};
+
 void BluetoothTask::run()
 {
     BLEDevice::init("ESP32SmartKnob");
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
     BLEService *pService = pServer->createService(SERVICE_UUID);
+
+    // TX Characteristic (existing)
     pTxCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID_TX,
         BLECharacteristic::PROPERTY_NOTIFY);
     pTxCharacteristic->addDescriptor(new BLE2902());
+
+    // RX Characteristic (new)
+    pRxCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_UUID_RX,
+        BLECharacteristic::PROPERTY_WRITE);
+    pRxCharacteristic->setCallbacks(new MyCharacteristicCallbacks()); // You'll need to implement this
+
+    // Sensor Data Characteristic (new)
+    pSensorCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_UUID_SENSOR,
+        BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+    pSensorCharacteristic->addDescriptor(new BLE2902());
+
     pService->start();
     pServer->getAdvertising()->start();
     Serial.println("Waiting for a client to connect...");

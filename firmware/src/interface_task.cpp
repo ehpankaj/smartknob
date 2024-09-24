@@ -18,6 +18,22 @@ static PB_SmartKnobConfig configs[] = {
     // float snap_point_bias;
     // int8_t led_hue;
     {
+        0,
+        0,
+        100,
+        0,
+        -1, // max position < min position indicates no bounds
+        8.225806452 * PI / 180,
+        3,
+        1,
+        1.1,
+        "Unbounded\nNo detents",
+        0,
+        {},
+        0,
+        200,
+    },
+    {
         127,
         0,
         5,
