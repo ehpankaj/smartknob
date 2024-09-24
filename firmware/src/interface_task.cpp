@@ -454,5 +454,29 @@ void InterfaceTask::switchConfig()
     applyConfig(configs[config_index], false);
 
     // Send the config type and current position over Bluetooth
-    plaintext_protocol_.sendConfigType(config_index, latest_state_.current_position);
+    sendConfigType(config_index, latest_state_.current_position);
+}
+
+void InterfaceTask::sendConfigType(int configType, int currentPosition)
+{
+    const char *configTypeStr;
+    switch (configType)
+    {
+    case 0:
+        configTypeStr = "volume";
+        break;
+    case 1:
+        configTypeStr = "seek";
+        break;
+    case 2:
+        configTypeStr = "skip";
+        break;
+    default:
+        configTypeStr = "unknown";
+        break;
+    }
+
+    char ble_buffer[200];
+    snprintf(ble_buffer, sizeof(ble_buffer), "{type: %s, value: %d}", configTypeStr, currentPosition);
+    bluetooth_task->sendData(ble_buffer); // Send the config type and current position over Bluetooth
 }

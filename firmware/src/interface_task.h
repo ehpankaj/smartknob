@@ -27,6 +27,8 @@ public:
     void log(const char *msg) override;
     void setConfiguration(Configuration *configuration);
 
+    void sendConfigType(int configType, int currentPosition); // Ensure this line is present
+
 protected:
     void run();
 

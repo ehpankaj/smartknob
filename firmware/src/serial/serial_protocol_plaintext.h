@@ -14,7 +14,7 @@ class SerialProtocolPlaintext : public SerialProtocol
 {
 public:
     SerialProtocolPlaintext(Stream &stream, MotorCalibrationCallback motor_calibration_callback, MotorTask &motor_task)
-        : SerialProtocol(), stream_(stream), motor_calibration_callback_(motor_calibration_callback), motor_task_(motor_task) {} // Added motor_task_ initialization
+        : SerialProtocol(), stream_(stream), motor_calibration_callback_(motor_calibration_callback), motor_task_(motor_task) {} // Remove interface_task_ initialization
     ~SerialProtocolPlaintext() {}
     void log(const char *msg) override;
     void loop() override;
@@ -28,7 +28,6 @@ public:
 
     void init(DemoConfigChangeCallback demo_config_change_callback, StrainCalibrationCallback strain_calibration_callback);
     void applyNewConfig();
-    void sendConfigType(int configType, int currentPosition); // Updated method signature
 
 private:
     String currentConfig;
