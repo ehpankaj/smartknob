@@ -452,4 +452,7 @@ void InterfaceTask::switchConfig()
     snprintf(buf_, sizeof(buf_), "Switching to config %d", config_index);
     log(buf_);
     applyConfig(configs[config_index], false);
+
+    // Send the config type and current position over Bluetooth
+    plaintext_protocol_.sendConfigType(config_index, latest_state_.current_position);
 }

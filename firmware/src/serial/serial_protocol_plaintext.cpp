@@ -87,7 +87,7 @@ void SerialProtocolPlaintext::handleState(const PB_SmartKnobState &state)
 
         stream_.print(buffer);
         char ble_buffer[200];
-        snprintf(ble_buffer, sizeof(ble_buffer), "%s\n", buffer);
+        snprintf(ble_buffer, sizeof(ble_buffer), "{type: test, value: %d}", state.current_position);
         bluetooth_task->sendData(ble_buffer); // Send the state over Bluetooth
     }
 }
@@ -301,4 +301,28 @@ void SerialProtocolPlaintext::init(DemoConfigChangeCallback demo_config_change_c
     demo_config_change_callback_ = demo_config_change_callback;
     strain_calibration_callback_ = strain_calibration_callback;
     stream_.println("SmartKnob starting!\n\nSerial mode: plaintext\nPress 'C' at any time to calibrate motor/sensor.\nPress 'S' at any time to calibrate strain sensors.\nPress <Space> to change haptic modes.");
+}
+
+void SerialProtocolPlaintext::sendConfigType(int configType, int currentPosition)
+{
+    const char *configTypeStr;
+    switch (configType)
+    {
+    case 0:
+        configTypeStr = "volume";
+        break;
+    case 1:
+        configTypeStr = "seek";
+        break;
+    case 2:
+        configTypeStr = "skip";
+        break;
+    default:
+        configTypeStr = "unknown";
+        break;
+    }
+
+    char ble_buffer[200];
+    snprintf(ble_buffer, sizeof(ble_buffer), "{type: %s, value: %d}", configTypeStr, currentPosition);
+    bluetooth_task->sendData(ble_buffer); // Send the config type and current position over Bluetooth
 }

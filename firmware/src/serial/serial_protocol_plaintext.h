@@ -28,6 +28,7 @@ public:
 
     void init(DemoConfigChangeCallback demo_config_change_callback, StrainCalibrationCallback strain_calibration_callback);
     void applyNewConfig();
+    void sendConfigType(int configType, int currentPosition); // Updated method signature
 
 private:
     String currentConfig;
