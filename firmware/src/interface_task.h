@@ -11,6 +11,7 @@
 #include "serial/serial_protocol_protobuf.h"
 #include "serial/uart_stream.h"
 #include "task.h"
+#include "serial/bluetooth.h" // Include BluetoothTask header
 
 #ifndef SK_FORCE_UART_STREAM
 #define SK_FORCE_UART_STREAM 0
@@ -21,7 +22,7 @@ class InterfaceTask : public Task<InterfaceTask>, public Logger
     friend class Task<InterfaceTask>; // Allow base Task to invoke protected run()
 
 public:
-    InterfaceTask(const uint8_t task_core, MotorTask &motor_task);
+    InterfaceTask(const uint8_t task_core, MotorTask &motor_task, BluetoothTask &bluetooth_task); // Add BluetoothTask parameter
     virtual ~InterfaceTask();
 
     void log(const char *msg) override;
@@ -35,6 +36,7 @@ protected:
 private:
     UartStream stream_;
     MotorTask &motor_task_;
+    BluetoothTask &bluetooth_task_; // Declare BluetoothTask member variable
     char buf_[128];
 
     SemaphoreHandle_t mutex_;
@@ -68,8 +70,9 @@ private:
     void checkTouchSensor();
     void switchConfig();                            // New method to switch configurations
     static constexpr uint8_t TOUCH_PIN = 15;        // GPIO15
-    static constexpr uint16_t TOUCH_THRESHOLD = 40; // Adjust as needed
+    static constexpr uint16_t TOUCH_THRESHOLD = 20; // Adjust as needed
     static constexpr uint32_t DEBOUNCE_DELAY = 50;  // 50 ms debounce delay
     uint32_t last_touch_time_ = 0;
+    int config_index = 0;
     bool touch_detected_ = false;
 };

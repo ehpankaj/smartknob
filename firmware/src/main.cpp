@@ -6,15 +6,15 @@
 
 Configuration config;
 
+BluetoothTask bluetooth_taskt(0);
 static MotorTask motor_task(1, config);
-InterfaceTask interface_task(0, motor_task);
-BluetoothTask* bluetooth_task = new BluetoothTask(0); // Changed to pointer
+InterfaceTask interface_task(0, motor_task, bluetooth_taskt);
 
 void setup()
 {
   interface_task.begin();
   motor_task.begin();
-  bluetooth_task->begin();
+  bluetooth_taskt.begin();
 
   config.setLogger(&interface_task);
   config.loadFromDisk();

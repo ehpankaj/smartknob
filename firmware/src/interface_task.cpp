@@ -243,13 +243,14 @@ static PB_SmartKnobConfig configs[] = {
     },
 };
 
-InterfaceTask::InterfaceTask(const uint8_t task_core, MotorTask &motor_task) : Task("Interface", 3400, 1, task_core),
-                                                                               stream_(),
-                                                                               motor_task_(motor_task),
-                                                                               plaintext_protocol_(stream_, [this]()
-                                                                                                   { motor_task_.runCalibration(); }, motor_task_),
-                                                                               proto_protocol_(stream_, [this](PB_SmartKnobConfig &config)
-                                                                                               { applyConfig(config, true); })
+InterfaceTask::InterfaceTask(const uint8_t task_core, MotorTask &motor_task, BluetoothTask &bluetooth_task) : Task("Interface", 3400, 1, task_core),
+                                                                                                              stream_(),
+                                                                                                              motor_task_(motor_task),
+                                                                                                              bluetooth_task_(bluetooth_task), // Initialize BluetoothTask member variable
+                                                                                                              plaintext_protocol_(stream_, [this]()
+                                                                                                                                  { motor_task_.runCalibration(); }, motor_task_),
+                                                                                                              proto_protocol_(stream_, [this](PB_SmartKnobConfig &config)
+                                                                                                                              { applyConfig(config, true); })
 {
     log_queue_ = xQueueCreate(10, sizeof(std::string *));
     assert(log_queue_ != NULL);
@@ -405,6 +406,14 @@ void InterfaceTask::publishState()
     // Apply local state before publishing to serial
     latest_state_.press_nonce = press_count_;
     current_protocol_->handleState(latest_state_);
+
+    // Check for substantial change in current_position
+    static int32_t last_position = latest_state_.current_position;
+    if (latest_state_.current_position != last_position)
+    {
+        sendConfigType(config_index, latest_state_.current_position);
+        last_position = latest_state_.current_position;
+    }
 }
 
 void InterfaceTask::applyConfig(PB_SmartKnobConfig &config, bool from_remote)
@@ -447,7 +456,6 @@ void InterfaceTask::checkTouchSensor()
 
 void InterfaceTask::switchConfig()
 {
-    static int config_index = 0;
     config_index = (config_index + 1) % 3; // Cycle through 3 configurations
     snprintf(buf_, sizeof(buf_), "Switching to config %d", config_index);
     log(buf_);
@@ -478,5 +486,5 @@ void InterfaceTask::sendConfigType(int configType, int currentPosition)
 
     char ble_buffer[200];
     snprintf(ble_buffer, sizeof(ble_buffer), "{type: %s, value: %d}", configTypeStr, currentPosition);
-    bluetooth_task->sendData(ble_buffer); // Send the config type and current position over Bluetooth
+    bluetooth_task_.sendData(ble_buffer); // Send the config type and current position over Bluetooth
 }
