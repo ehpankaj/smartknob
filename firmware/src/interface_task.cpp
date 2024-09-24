@@ -259,6 +259,8 @@ InterfaceTask::InterfaceTask(const uint8_t task_core, MotorTask &motor_task) : T
 
     mutex_ = xSemaphoreCreateMutex();
     assert(mutex_ != NULL);
+
+    initTouchSensor(); // Initialize touch sensor
 }
 
 InterfaceTask::~InterfaceTask()
@@ -354,6 +356,8 @@ void InterfaceTask::run()
             }
         }
 
+        checkTouchSensor(); // Check touch sensor state
+
         delay(1);
     }
 }
@@ -408,4 +412,31 @@ void InterfaceTask::applyConfig(PB_SmartKnobConfig &config, bool from_remote)
     remote_controlled_ = from_remote;
     latest_config_ = config;
     motor_task_.setConfig(config);
+}
+
+void InterfaceTask::initTouchSensor()
+{
+    touchAttachInterrupt(TOUCH_PIN, nullptr, TOUCH_THRESHOLD);
+    touch_pad_filter_start(10); // Filter touch signal with 10ms interval
+}
+
+void InterfaceTask::checkTouchSensor()
+{
+    uint16_t touch_value = touchRead(TOUCH_PIN);
+    uint32_t current_time = millis();
+
+    if (touch_value < TOUCH_THRESHOLD)
+    {
+        if (!touch_detected_ && (current_time - last_touch_time_ > DEBOUNCE_DELAY))
+        {
+            touch_detected_ = true;
+            last_touch_time_ = current_time;
+            log("Touch detected");
+            // Add your touch handling code here
+        }
+    }
+    else
+    {
+        touch_detected_ = false;
+    }
 }

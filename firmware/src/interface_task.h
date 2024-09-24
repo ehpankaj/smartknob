@@ -2,6 +2,7 @@
 
 #include <AceButton.h>
 #include <Arduino.h>
+#include <driver/touch_pad.h> // Include touch pad driver
 
 #include "configuration.h"
 #include "logger.h"
@@ -59,4 +60,13 @@ private:
     void changeConfig(bool next);
     void publishState();
     void applyConfig(PB_SmartKnobConfig &config, bool from_remote);
+
+    // Touch sensor variables
+    void initTouchSensor();
+    void checkTouchSensor();
+    static constexpr uint8_t TOUCH_PIN = 13;        // GPIO13
+    static constexpr uint16_t TOUCH_THRESHOLD = 40; // Adjust as needed
+    static constexpr uint32_t DEBOUNCE_DELAY = 50;  // 50 ms debounce delay
+    uint32_t last_touch_time_ = 0;
+    bool touch_detected_ = false;
 };
