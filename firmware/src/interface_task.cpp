@@ -436,11 +436,20 @@ void InterfaceTask::checkTouchSensor()
             touch_detected_ = true;
             last_touch_time_ = current_time;
             log("Touch detected");
-            // Add your touch handling code here
+            switchConfig(); // Switch configuration on touch
         }
     }
     else
     {
         touch_detected_ = false;
     }
+}
+
+void InterfaceTask::switchConfig()
+{
+    static int config_index = 0;
+    config_index = (config_index + 1) % 3; // Cycle through 3 configurations
+    snprintf(buf_, sizeof(buf_), "Switching to config %d", config_index);
+    log(buf_);
+    applyConfig(configs[config_index], false);
 }
