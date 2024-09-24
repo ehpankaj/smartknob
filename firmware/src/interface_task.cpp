@@ -471,13 +471,13 @@ void InterfaceTask::sendConfigType(int configType, int currentPosition)
     switch (configType)
     {
     case 0:
-        configTypeStr = "volume";
+        configTypeStr = "skip";
         break;
     case 1:
-        configTypeStr = "seek";
+        configTypeStr = "volume";
         break;
     case 2:
-        configTypeStr = "skip";
+        configTypeStr = "seek";
         break;
     default:
         configTypeStr = "unknown";
