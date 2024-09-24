@@ -425,6 +425,10 @@ void InterfaceTask::checkTouchSensor()
     uint16_t touch_value = touchRead(TOUCH_PIN);
     uint32_t current_time = millis();
 
+    // // Log the touch value for debugging
+    // snprintf(buf_, sizeof(buf_), "Touch value: %d", touch_value);
+    // log(buf_);
+
     if (touch_value < TOUCH_THRESHOLD)
     {
         if (!touch_detected_ && (current_time - last_touch_time_ > DEBOUNCE_DELAY))

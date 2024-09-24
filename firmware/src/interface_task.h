@@ -64,7 +64,7 @@ private:
     // Touch sensor variables
     void initTouchSensor();
     void checkTouchSensor();
-    static constexpr uint8_t TOUCH_PIN = 13;        // GPIO13
+    static constexpr uint8_t TOUCH_PIN = 15;        // GPIO13
     static constexpr uint16_t TOUCH_THRESHOLD = 40; // Adjust as needed
     static constexpr uint32_t DEBOUNCE_DELAY = 50;  // 50 ms debounce delay
     uint32_t last_touch_time_ = 0;
