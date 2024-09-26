@@ -20,14 +20,30 @@ static PB_SmartKnobConfig configs[] = {
     {
         0,
         0,
+        0,
+        0,
+        20,
+        9 * PI / 180,
+        1,
+        0.3,
+        1.1,
+        "Config Volume",
+        0,
+        {},
+        0,
+        0,
+    },
+    {
+        0,
+        0,
         100,
         0,
         -1, // max position < min position indicates no bounds
-        8.225806452 * PI / 180,
+        180 * PI / 180,
         3,
         1,
-        1.1,
-        "Config 0",
+        0.55,
+        "Config Skip",
         0,
         {},
         0,
@@ -43,23 +59,7 @@ static PB_SmartKnobConfig configs[] = {
         1,
         0.3,
         1.1,
-        "Config 1",
-        0,
-        {},
-        0,
-        0,
-    },
-    {
-        0,
-        0,
-        0,
-        0,
-        20,
-        5 * PI / 180,
-        1,
-        0.3,
-        1.1,
-        "Config 2",
+        "Config Seek",
         0,
         {},
         0,
@@ -487,10 +487,10 @@ void InterfaceTask::sendConfigType(int configType, int currentPosition)
     switch (configType)
     {
     case 0:
-        configTypeStr = "skip";
+        configTypeStr = "volume";
         break;
     case 1:
-        configTypeStr = "volume";
+        configTypeStr = "skip";
         break;
     case 2:
         configTypeStr = "seek";
@@ -501,6 +501,6 @@ void InterfaceTask::sendConfigType(int configType, int currentPosition)
     }
 
     char ble_buffer[200];
-    snprintf(ble_buffer, sizeof(ble_buffer), "{type: %s, value: %d}", configTypeStr, currentPosition);
+    snprintf(ble_buffer, sizeof(ble_buffer), "{\"type\": \"%s\", \"value\": %d}", configTypeStr, currentPosition);
     bluetooth_task_.sendData(ble_buffer); // Send the config type and current position over Bluetooth
 }
